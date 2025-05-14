@@ -3,6 +3,8 @@ package page
 import (
 	"time"
 
+	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/domain/component"
+	"github.com/patrickdevbr-portfolio/cms/libs/go-common/audit"
 	"github.com/patrickdevbr-portfolio/cms/libs/go-common/publicid"
 )
 
@@ -15,26 +17,29 @@ const (
 type PageID publicid.PublicID
 
 type Page struct {
-	ID           PageID
-	Title        string
-	Status       string
-	CreatedAt    time.Time
-	PublisheddAt *time.Time
+	audit.Audit
+	ID          PageID
+	Title       string
+	Status      string
+	Components  []component.Component
+	PublishedAt *time.Time
 }
 
-func (p *Page) Publish() {
+func (p *Page) MarkAsPublished() {
 	publishedAt := time.Now()
 
 	p.Status = PUBLISHED
-	p.PublisheddAt = &publishedAt
+	p.PublishedAt = &publishedAt
 }
 
 func NewDraft() *Page {
 	return &Page{
-		ID:           PageID(publicid.New()),
-		Title:        "Draft",
-		Status:       DRAFT,
-		CreatedAt:    time.Now(),
-		PublisheddAt: nil,
+		ID:          PageID(publicid.New()),
+		Title:       "Draft",
+		Status:      DRAFT,
+		PublishedAt: nil,
+		Audit: audit.Audit{
+			CreatedAt: time.Now(),
+		},
 	}
 }

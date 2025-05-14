@@ -2,13 +2,14 @@ package auth
 
 import (
 	"context"
+	"os"
 
 	"github.com/coreos/go-oidc"
 )
 
-const (
-	issuer   = ""
-	cliendID = ""
+var (
+	issuer   = os.Getenv("OIDC_ISSUER_URL")
+	cliendID = os.Getenv("OIDC_CLIENT_ID")
 )
 
 func NewOIDCProvider() (*oidc.Provider, error) {

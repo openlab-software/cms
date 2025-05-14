@@ -6,10 +6,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/application/services"
-	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/infra/db/mongo"
+	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/infra/db/mongodb"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/infra/rest"
 	"github.com/patrickdevbr-portfolio/cms/libs/go-common/auth"
-	"github.com/patrickdevbr-portfolio/cms/libs/go-common/mongodb"
+	"github.com/patrickdevbr-portfolio/cms/libs/go-common/mongodatabase"
 )
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 	}
 	engine.Use(auth.NewMiddleware(oidcProvider))
 
-	mongoClient, err := mongodb.Connect(context.Background())
+	mongoClient, err := mongodatabase.Connect(context.Background())
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -30,7 +30,7 @@ func main() {
 
 	pages := v1.Group("/pages")
 	rest.NewPageRest(pages, &services.PageServiceImpl{
-		PageRepository: &mongo.PageRepository{
+		PageRepository: &mongodb.PageRepository{
 			Client: mongoClient,
 		},
 	})

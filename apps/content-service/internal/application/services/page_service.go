@@ -18,7 +18,7 @@ func (ps *PageServiceImpl) CreateDraftPage() (*page.Page, error) {
 }
 
 func (ps *PageServiceImpl) PublishPage(p *page.Page) error {
-	p.Publish()
+	p.MarkAsPublished()
 
 	if err := ps.Update(p); err != nil {
 		return err
