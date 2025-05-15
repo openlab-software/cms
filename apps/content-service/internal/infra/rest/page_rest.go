@@ -1,9 +1,9 @@
 package rest
 
 import (
+	"encoding/json"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/domain/page"
 )
 
@@ -11,32 +11,31 @@ type PageRest struct {
 	page.PageService
 }
 
-func NewPageRest(rg *gin.RouterGroup, pageService page.PageService) {
+func NewPageRest(sm *http.ServeMux, pageService page.PageService) {
 	pageRest := &PageRest{
 		PageService: pageService,
 	}
 
-	rg.POST("/", pageRest.post)
-	rg.GET("/", pageRest.get)
+	sm.HandleFunc("POST /v1/pages", pageRest.createPage)
+	sm.HandleFunc("GET /v1/pages", pageRest.getPages)
 }
 
-func (pr *PageRest) post(ctx *gin.Context) {
+func (pr *PageRest) createPage(w http.ResponseWriter, r *http.Request) {
 	page, err := pr.PageService.CreateDraftPage()
 
+	w.Header().Set("Content-Type", "application/json")
+
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"err": err,
-		})
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]any{"err": err})
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"page": page,
-	})
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(page)
 }
 
-func (pr *PageRest) get(ctx *gin.Context) {
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"page": page.NewDraft(),
-	})
+func (pr *PageRest) getPages(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(page.NewDraft())
 }
