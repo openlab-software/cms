@@ -18,11 +18,11 @@ type PageID publicid.PublicID
 
 type Page struct {
 	audit.Audit
-	ID          PageID
+	PageID      PageID `bson:"page_id" json:"page_id"`
 	Title       string
 	Status      string
 	Components  []component.Component
-	PublishedAt *time.Time
+	PublishedAt *time.Time `bson:"published_at" json:"published_at"`
 }
 
 func (p *Page) MarkAsPublished() {
@@ -34,7 +34,7 @@ func (p *Page) MarkAsPublished() {
 
 func NewDraft() *Page {
 	return &Page{
-		ID:          PageID(publicid.New()),
+		PageID:      PageID(publicid.New("page")),
 		Title:       "Draft",
 		Status:      DRAFT,
 		PublishedAt: nil,
@@ -42,4 +42,10 @@ func NewDraft() *Page {
 			CreatedAt: time.Now(),
 		},
 	}
+}
+
+func ParsePageID(s string) (PageID, error) {
+	publicID, err := publicid.Parse("page", s)
+
+	return PageID(publicID), err
 }

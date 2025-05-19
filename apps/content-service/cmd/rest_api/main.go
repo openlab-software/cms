@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/joho/godotenv"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/application/services"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/infra/db/mongodb"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/infra/rest"
@@ -12,6 +13,7 @@ import (
 )
 
 func main() {
+	godotenv.Load()
 	router := http.NewServeMux()
 
 	// oidcProvider, err := auth.NewOIDCProvider()
