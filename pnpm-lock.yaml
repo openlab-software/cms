@@ -12,7 +12,7 @@ importers:
         specifier: ^2.5.0
         version: 2.5.3
 
-  apps/web:
+  apps/frontend:
     dependencies:
       '@cms/ts-common':
         specifier: workspace:*
