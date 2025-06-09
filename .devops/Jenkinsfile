@@ -1,11 +1,40 @@
 pipeline {
     agent any
 
+    environment {
+        REGISTRY_URL = 'registry.patrick.dev.br'
+        IMAGE_NAME = 'cms-content-service'
+        IMAGE_TAG = 'latest'
+        DOCKER_CREDENTIALS_ID = 'docker-registry'
+    }
+
     stages {
-        stage('Hello World') {
-            steps {
-                echo 'Hello World'
-            }
+        stage('Build Go Binary') {
+      steps {
+        sh '''
+                mkdir -p bin/
+                GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o app main.go
+                '''
+      }
+        }
+
+        stage('Build Docker Image') {
+      steps {
+        sh '''
+                    docker build -t $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG -f .devops/docker/Dockerfile.content-service .
+                '''
+      }
+        }
+
+        stage('Push to Registry') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: env.DOCKER_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+          sh '''
+            echo "$DOCKER_PASS" | docker login $REGISTRY_URL -u "$DOCKER_USER" --password-stdin
+            docker push $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG
+          '''
+        }
+      }
         }
     }
 }
