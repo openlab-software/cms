@@ -18,6 +18,7 @@ func NewPageRest(sm *http.ServeMux, pageService page.PageService) {
 	}
 
 	sm.HandleFunc("POST /v1/pages", pageRest.createPage)
+	sm.HandleFunc("POST /v2/pages", pageRest.createPage)
 	sm.HandleFunc("GET /v1/pages", pageRest.getPages)
 	sm.HandleFunc("POST /v1/pages/{id}/publish", pageRest.publishPage)
 }

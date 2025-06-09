@@ -21,7 +21,7 @@ type config struct {
 }
 
 func (app *application) run() error {
-	godotenv.Load()
+	godotenv.Load(".env.dev")
 
 	mux := http.NewServeMux()
 
