@@ -1,6 +1,8 @@
 pipeline {
     agent any
 
+    tools { go '1.24.2' }
+
     environment {
         REGISTRY_URL = 'registry.patrick.dev.br'
         IMAGE_NAME = 'cms-content-service'
