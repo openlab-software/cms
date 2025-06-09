@@ -14,9 +14,9 @@ pipeline {
         stage('Build Go Binary') {
       steps {
         sh '''
-                mkdir -p bin/
-                GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o app main.go
-                '''
+          cd apps/content-service
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/app cmd/rest_api/*.go
+        '''
       }
         }
 
