@@ -10,33 +10,24 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'docker-registry'
     }
 
-    stages {
-        stage('Build Go Binary') {
-      steps {
-        sh '''
-          cd apps/content-service
-          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/app cmd/rest_api/*.go
-        '''
+      stages {
+            stage('Build Docker Image') {
+                  steps {
+                        script {
+                              app = docker.build("cms/content-service:${env.BUILD_ID}", "-f ./.devops/docker/Dockerfile.content-service")
+                        }
+                  }
+            }
+            
+            stage('Build Docker Image') {
+                  steps {
+                        script {
+                              docker.withRegistry('https://registry.patrick.dev.br', 'docker-registry') {
+                                    app.push("latest")
+                                    app.push("${env.BUILD_ID}")
+                              }
+                        }
+                  }
+            }
       }
-        }
-
-        stage('Build Docker Image') {
-      steps {
-        sh '''
-                    docker build -t $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG -f .devops/docker/Dockerfile.content-service .
-                '''
-      }
-        }
-
-        stage('Push to Registry') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: env.DOCKER_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-          sh '''
-            echo "$DOCKER_PASS" | docker login $REGISTRY_URL -u "$DOCKER_USER" --password-stdin
-            docker push $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG
-          '''
-        }
-      }
-        }
-    }
 }
