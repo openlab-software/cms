@@ -3,31 +3,18 @@ pipeline {
 
     tools { 
       go '1.24.2'
-      dockerTool 'docker'
      }
 
-    environment {
-        REGISTRY_URL = 'registry.patrick.dev.br'
-        IMAGE_NAME = 'cms-content-service'
-        IMAGE_TAG = 'latest'
-        DOCKER_CREDENTIALS_ID = 'docker-registry'
-    }
-
       stages {
-            stage('Build Docker Image') {
+            stage('Kaniko Build & Push Image') {
                   steps {
-                        script {
-                              app = docker.build("cms/content-service:${env.BUILD_ID}", "-f ./.devops/docker/Dockerfile.content-service .")
-                        }
-                  }
-            }
-            
-            stage('Push Docker Image') {
-                  steps {
-                        script {
-                              docker.withRegistry('https://registry.patrick.dev.br', 'docker-registry') {
-                                    app.push("latest")
-                                    app.push("${env.BUILD_ID}")
+                        container('kaniko') {
+                              script {
+                                    sh '''
+                                    /kaniko/executor --dockerfile `pwd`.devops/docker/Dockerfile.content-service \
+                                                --context `pwd` \
+                                                --destination=cms-content-service:${BUILD_NUMBER}
+                                    '''
                               }
                         }
                   }
