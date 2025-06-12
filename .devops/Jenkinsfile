@@ -1,7 +1,10 @@
 pipeline {
     agent any
 
-    tools { go '1.24.2' }
+    tools { 
+      go '1.24.2'
+      'org.jenkinsci.plugins.docker.commons.tools.DockerTool' 'docker'
+     }
 
     environment {
         REGISTRY_URL = 'registry.patrick.dev.br'
