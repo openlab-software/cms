@@ -5,6 +5,33 @@ pipeline {
       go '1.24.2'
      }
 
+         agent {
+        kubernetes {
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:latest
+      command:
+        - cat
+      tty: true
+      volumeMounts:
+        - name: kaniko-secret
+          mountPath: /kaniko/.docker
+  volumes:
+    - name: kaniko-secret
+      secret:
+        secretName: regcred
+        items:
+          - key: .dockerconfigjson
+            path: config.json
+"""
+            defaultContainer 'kaniko'
+        }
+    }
+
       stages {
             stage('Kaniko Build & Push Image') {
                   steps {
