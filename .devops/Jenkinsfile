@@ -4,44 +4,25 @@ pipeline {
       go '1.24.2'
      }
 
-         agent {
-        kubernetes {
-            yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-    - name: kaniko
-      image: gcr.io/kaniko-project/executor:latest
-      tty: true
-      volumeMounts:
-        - name: kaniko-secret
-          mountPath: /kaniko/.docker
-  volumes:
-    - name: kaniko-secret
-      secret:
-        secretName: regcred
-        items:
-          - key: .dockerconfigjson
-            path: config.json
-"""
-            defaultContainer 'kaniko'
-        }
+    agent {
+      kubernetes {
+        yamlFile 'builder.yaml'
+      }
     }
 
-      stages {
-            stage('Kaniko Build & Push Image') {
-                  steps {
-                        container('kaniko') {
-                              script {
-                                    sh '''
-                                    /kaniko/executor --dockerfile `pwd`.devops/docker/Dockerfile.content-service \
-                                                --context `pwd` \
-                                                --destination=cms-content-service:${BUILD_NUMBER}
-                                    '''
-                              }
-                        }
-                  }
-            }
-      }
+    stages {
+          stage('Kaniko Build & Push Image') {
+                steps {
+                      container('kaniko') {
+                            script {
+                                  sh '''
+                                  /kaniko/executor --dockerfile `pwd`.devops/docker/Dockerfile.content-service \
+                                              --context `pwd` \
+                                              --destination=cms-content-service:${BUILD_NUMBER}
+                                  '''
+                            }
+                      }
+                }
+          }
+    }
 }
