@@ -18,7 +18,7 @@ pipeline {
                                   sh '''
                                   /kaniko/executor --dockerfile `pwd`.devops/docker/Dockerfile.content-service \
                                               --context `pwd` \
-                                              --destination=cms-content-service:${BUILD_NUMBER}
+                                              --destination=registry.patrick.dev.br/cms/content-service:${BUILD_NUMBER}
                                   '''
                             }
                       }
