@@ -1,28 +1,38 @@
 pipeline {
-
-    tools { 
-      go '1.24.2'
-     }
-
-    agent {
-      kubernetes {
-        yamlFile '.devops/builder.yaml'
+      tools {
+            go '1.24.2'
       }
-    }
 
-    stages {
-          stage('Kaniko Build & Push Image') {
-                steps {
-                      container('kaniko') {
-                            script {
-                                  sh '''
+      agent {
+            kubernetes {
+                  yamlFile '.devops/builder.yaml'
+            }
+      }
+
+      stages {
+            stage('Build API') {
+                  steps {
+                        script {
+                              sh '''
+                                    cd apps/content-service
+                                    go mod tidy
+                                    go build -o ./bin/app ./cmd/rest_api/
+                              '''
+                        }
+                  }
+            }
+            stage('Kaniko Build & Push Image') {
+                  steps {
+                        container('kaniko') {
+                              script {
+                                    sh '''
                                   /kaniko/executor --dockerfile `pwd`.devops/docker/Dockerfile.content-service \
                                               --context `pwd` \
                                               --destination=registry.patrick.dev.br/cms/content-service:${BUILD_NUMBER}
                                   '''
-                            }
-                      }
-                }
-          }
-    }
+                              }
+                        }
+                  }
+            }
+      }
 }
