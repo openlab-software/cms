@@ -24,13 +24,7 @@ pipeline {
             stage('Kaniko Build & Push Image') {
                   steps {
                         container('kaniko') {
-                              script {
-                                    sh '''
-                                  /kaniko/executor --dockerfile `pwd`.devops/docker/Dockerfile.content-service \
-                                              --context `pwd` \
-                                              --destination=registry.patrick.dev.br/cms/content-service:${BUILD_NUMBER}
-                                  '''
-                              }
+                              sh 'echo "Kaniko container funcionando!"'
                         }
                   }
             }
