@@ -1,11 +1,11 @@
 package component
 
 var stylesBreakpoint = map[string]struct{}{
-	"TEXT":      {},
-	"IMAGE":     {},
-	"BUTTON":    {},
-	"CONTAINER": {},
-	"COLUMN":    {},
+	"base":          {},
+	"mobile":        {},
+	"tablet":        {},
+	"desktop":       {},
+	"large_desktop": {},
 }
 
 type StyleBreakpoint string

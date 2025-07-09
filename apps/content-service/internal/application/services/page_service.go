@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/domain/component"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/domain/page"
 )
 
@@ -43,4 +44,14 @@ func (ps *PageServiceImpl) GetPageById(id page.PageID) (*page.Page, error) {
 		return nil, err
 	}
 	return page, nil
+}
+
+func (ps *PageServiceImpl) AddComponent(p *page.Page, comp *component.Component) error {
+	p.AddComponent(comp)
+
+	if err := ps.Update(p); err != nil {
+		return err
+	}
+
+	return nil
 }

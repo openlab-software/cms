@@ -2,9 +2,9 @@ package rest
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
+	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/domain/component"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/domain/page"
 )
 
@@ -18,9 +18,9 @@ func NewPageRest(sm *http.ServeMux, pageService page.PageService) {
 	}
 
 	sm.HandleFunc("POST /v1/pages", pageRest.createPage)
-	sm.HandleFunc("POST /v2/pages", pageRest.createPage)
 	sm.HandleFunc("GET /v1/pages", pageRest.getPages)
 	sm.HandleFunc("POST /v1/pages/{id}/publish", pageRest.publishPage)
+	sm.HandleFunc("POST /v1/pages/{id}/components", pageRest.addComponent)
 }
 
 func (pr *PageRest) createPage(w http.ResponseWriter, r *http.Request) {
@@ -29,8 +29,7 @@ func (pr *PageRest) createPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]any{"err": err})
+		writeErr(w, err)
 		return
 	}
 
@@ -46,8 +45,7 @@ func (pr *PageRest) getPages(w http.ResponseWriter, r *http.Request) {
 
 	pages, err := pr.PageService.GetPages(filter)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]any{"err": err})
+		writeErr(w, err)
 		return
 	}
 
@@ -59,23 +57,53 @@ func (pr *PageRest) getPages(w http.ResponseWriter, r *http.Request) {
 func (pr *PageRest) publishPage(w http.ResponseWriter, r *http.Request) {
 	pageID, err := page.ParsePageID(r.PathValue("id"))
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]any{"err": err})
+		writeErr(w, err)
 		return
 	}
 
 	page, err := pr.PageService.GetPageById(pageID)
 	if err != nil {
-		fmt.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]any{"err": err})
+		writeErr(w, err)
 		return
 	}
 
 	if err := pr.PageService.PublishPage(page); err != nil {
-		fmt.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]any{"err": err})
+		writeErr(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, page)
+}
+
+func (pr *PageRest) addComponent(w http.ResponseWriter, r *http.Request) {
+	pageID, err := page.ParsePageID(r.PathValue("id"))
+	if err != nil {
+		writeErr(w, err)
+		return
+	}
+
+	page, err := pr.PageService.GetPageById(pageID)
+	if err != nil {
+		writeErr(w, err)
+		return
+	}
+
+	var dto addComponentDTO
+	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
+		http.Error(w, "failed to parse JSON data", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	compType, err := component.NewComponentType(dto.Type)
+	if err != nil {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	newComponent := component.NewComponent(compType, dto.Data, nil)
+
+	if err := pr.PageService.AddComponent(page, newComponent); err != nil {
+		writeErr(w, err)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")

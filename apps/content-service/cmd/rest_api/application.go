@@ -36,11 +36,13 @@ func (app *application) run() error {
 		fmt.Println(err)
 	}
 
-	rest.NewPageRest(mux, &services.PageServiceImpl{
+	pageSvc := &services.PageServiceImpl{
 		PageRepository: &mongodb.PageRepository{
 			Client: mongoClient,
 		},
-	})
+	}
+
+	rest.NewPageRest(mux, pageSvc)
 
 	srv := &http.Server{
 		Addr:    app.config.addr,
