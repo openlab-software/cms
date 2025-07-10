@@ -15,6 +15,6 @@ type PageDraftedPayload struct {
 }
 
 type PagePublishedPayload struct {
-	ID          PageID    `json:"page_"`
+	ID          PageID    `json:"page_id"`
 	PublishedAt time.Time `json:"publishedAt"`
 }
