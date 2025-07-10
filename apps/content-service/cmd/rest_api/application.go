@@ -7,9 +7,11 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/application/services"
+	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/infra/amqpevent"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/infra/db/mongodb"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/infra/rest"
 	"github.com/patrickdevbr-portfolio/cms/libs/go-common/mongodatabase"
+	"github.com/patrickdevbr-portfolio/cms/libs/go-common/rabbitmq"
 )
 
 type application struct {
@@ -38,8 +40,15 @@ func (app *application) run() error {
 	}
 	defer mongoClient.Disconnect(ctx)
 
+	rabbitMQPublisher, err := rabbitmq.NewRabbitMQPublisher()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer rabbitMQPublisher.Close()
+
+	eventPublisher := amqpevent.NewRabbitMQEventPublisher(rabbitMQPublisher)
 	pageRepo := mongodb.NewPageRepository(mongoClient)
-	pageSvc := services.NewPageService(&pageRepo)
+	pageSvc := services.NewPageService(&pageRepo, eventPublisher)
 
 	rest.NewPageRest(mux, pageSvc)
 
