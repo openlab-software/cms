@@ -20,6 +20,10 @@ type PageDocument struct {
 	ID primitive.ObjectID `bson:"_id"`
 }
 
+func NewPageRepository(client *mongo.Client) PageRepository {
+	return PageRepository{Client: client}
+}
+
 func (repository *PageRepository) connect() (*mongo.Collection, context.Context, context.CancelFunc) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	collection := repository.Client.Database("cms").Collection("pages")

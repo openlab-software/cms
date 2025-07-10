@@ -26,15 +26,12 @@ func NewPageRest(sm *http.ServeMux, pageService page.PageService) {
 func (pr *PageRest) createPage(w http.ResponseWriter, r *http.Request) {
 	page, err := pr.PageService.CreateDraftPage()
 
-	w.Header().Set("Content-Type", "application/json")
-
 	if err != nil {
 		writeErr(w, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(page)
+	writeJSON(w, http.StatusOK, page)
 }
 
 func (pr *PageRest) getPages(w http.ResponseWriter, r *http.Request) {

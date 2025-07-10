@@ -31,16 +31,15 @@ func (app *application) run() error {
 	// }
 	// authMiddleware := auth.NewMiddleware(oidcProvider)
 
-	mongoClient, err := mongodatabase.Connect(context.Background())
+	ctx := context.Background()
+	mongoClient, err := mongodatabase.Connect(ctx)
 	if err != nil {
 		fmt.Println(err)
 	}
+	defer mongoClient.Disconnect(ctx)
 
-	pageSvc := &services.PageServiceImpl{
-		PageRepository: &mongodb.PageRepository{
-			Client: mongoClient,
-		},
-	}
+	pageRepo := mongodb.NewPageRepository(mongoClient)
+	pageSvc := services.NewPageService(&pageRepo)
 
 	rest.NewPageRest(mux, pageSvc)
 

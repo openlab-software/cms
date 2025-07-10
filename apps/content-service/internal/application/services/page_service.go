@@ -7,13 +7,19 @@ import (
 
 type PageServiceImpl struct {
 	page.PageService
-	page.PageRepository
+	Repository page.PageRepository
+}
+
+func NewPageService(repo page.PageRepository) page.PageService {
+	return &PageServiceImpl{
+		Repository: repo,
+	}
 }
 
 func (ps *PageServiceImpl) CreateDraftPage() (*page.Page, error) {
 	p := page.NewDraft()
 
-	if err := ps.Insert(p); err != nil {
+	if err := ps.Repository.Insert(p); err != nil {
 		return nil, err
 	}
 
@@ -23,7 +29,7 @@ func (ps *PageServiceImpl) CreateDraftPage() (*page.Page, error) {
 func (ps *PageServiceImpl) PublishPage(p *page.Page) error {
 	p.MarkAsPublished()
 
-	if err := ps.Update(p); err != nil {
+	if err := ps.Repository.Update(p); err != nil {
 		return err
 	}
 
@@ -31,7 +37,7 @@ func (ps *PageServiceImpl) PublishPage(p *page.Page) error {
 }
 
 func (ps *PageServiceImpl) GetPages(filter page.GetPages) ([]*page.Page, error) {
-	pages, err := ps.PageRepository.FindByTitle(filter.Title)
+	pages, err := ps.Repository.FindByTitle(filter.Title)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +45,7 @@ func (ps *PageServiceImpl) GetPages(filter page.GetPages) ([]*page.Page, error) 
 }
 
 func (ps *PageServiceImpl) GetPageById(id page.PageID) (*page.Page, error) {
-	page, err := ps.PageRepository.FindById(id)
+	page, err := ps.Repository.FindById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +55,7 @@ func (ps *PageServiceImpl) GetPageById(id page.PageID) (*page.Page, error) {
 func (ps *PageServiceImpl) AddComponent(p *page.Page, comp *component.Component) error {
 	p.AddComponent(comp)
 
-	if err := ps.Update(p); err != nil {
+	if err := ps.Repository.Update(p); err != nil {
 		return err
 	}
 
