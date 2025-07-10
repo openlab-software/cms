@@ -19,8 +19,8 @@ func NewPageService(repo page.PageRepository, eventPublisher event.Publisher) pa
 	}
 }
 
-func (ps *PageServiceImpl) CreateDraftPage() (*page.Page, error) {
-	p := page.NewDraft()
+func (ps *PageServiceImpl) CreateDraftPage(title string) (*page.Page, error) {
+	p := page.NewDraft(title)
 
 	if err := ps.repository.Insert(p); err != nil {
 		return nil, err

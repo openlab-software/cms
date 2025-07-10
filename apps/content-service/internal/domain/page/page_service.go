@@ -3,7 +3,7 @@ package page
 import "github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/domain/component"
 
 type PageService interface {
-	CreateDraftPage() (*Page, error)
+	CreateDraftPage(title string) (*Page, error)
 	PublishPage(p *Page) error
 	GetPages(filter GetPages) ([]*Page, error)
 	GetPageById(id PageID) (*Page, error)

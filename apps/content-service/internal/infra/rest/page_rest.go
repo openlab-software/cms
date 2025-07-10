@@ -24,7 +24,12 @@ func NewPageRest(sm *http.ServeMux, pageService page.PageService) {
 }
 
 func (pr *PageRest) createPage(w http.ResponseWriter, r *http.Request) {
-	page, err := pr.PageService.CreateDraftPage()
+	var dto createPageDTO
+	if err := readJSON(w, r, &dto); err != nil {
+		return
+	}
+
+	page, err := pr.PageService.CreateDraftPage(dto.Title)
 
 	if err != nil {
 		writeErr(w, err)
@@ -63,6 +68,10 @@ func (pr *PageRest) publishPage(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, err)
 		return
 	}
+	if page == nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 
 	if err := pr.PageService.PublishPage(page); err != nil {
 		writeErr(w, err)
@@ -85,11 +94,9 @@ func (pr *PageRest) addComponent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var dto addComponentDTO
-	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
-		http.Error(w, "failed to parse JSON data", http.StatusBadRequest)
+	if err := readJSON(w, r, &dto); err != nil {
 		return
 	}
-	defer r.Body.Close()
 
 	compType, err := component.NewComponentType(dto.Type)
 	if err != nil {

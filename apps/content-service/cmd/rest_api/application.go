@@ -10,6 +10,7 @@ import (
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/infra/amqpevent"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/infra/db/mongodb"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/infra/rest"
+	"github.com/patrickdevbr-portfolio/cms/libs/go-common/auth"
 	"github.com/patrickdevbr-portfolio/cms/libs/go-common/mongodatabase"
 	"github.com/patrickdevbr-portfolio/cms/libs/go-common/rabbitmq"
 )
@@ -27,11 +28,11 @@ func (app *application) run() error {
 
 	mux := http.NewServeMux()
 
-	// oidcProvider, err := auth.NewOIDCProvider()
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// authMiddleware := auth.NewMiddleware(oidcProvider)
+	oidcProvider, err := auth.NewOIDCProvider()
+	if err != nil {
+		fmt.Println(err)
+	}
+	auth.NewMiddleware(oidcProvider)(mux)
 
 	ctx := context.Background()
 	mongoClient, err := mongodatabase.Connect(ctx)
@@ -46,7 +47,7 @@ func (app *application) run() error {
 	}
 	defer rabbitMQPublisher.Close()
 
-	eventPublisher := amqpevent.NewRabbitMQEventPublisher(rabbitMQPublisher)
+	eventPublisher := amqpevent.NewEventPublisher(rabbitMQPublisher)
 	pageRepo := mongodb.NewPageRepository(mongoClient)
 	pageSvc := services.NewPageService(&pageRepo, eventPublisher)
 

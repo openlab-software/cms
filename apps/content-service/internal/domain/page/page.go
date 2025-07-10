@@ -36,10 +36,10 @@ func (p *Page) AddComponent(comp *component.Component) {
 	p.Components = append(p.Components, comp)
 }
 
-func NewDraft() *Page {
+func NewDraft(title string) *Page {
 	return &Page{
 		PageID:      PageID(publicid.New("page")),
-		Title:       "Draft",
+		Title:       title,
 		Status:      DRAFT,
 		PublishedAt: nil,
 		Audit: audit.Audit{
