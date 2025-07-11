@@ -34,7 +34,14 @@ func NewComponent(Type ComponentType, Data map[string]any, Styles map[StyleBreak
 }
 
 func (c Component) IsGlobal() bool {
-	return c.GlobalID == nil
+	return c.GlobalID != nil
+}
+
+func (c *Component) Update(from *Component) {
+	c.Data = from.Data
+	c.Styles = from.Styles
+	c.Type = from.Type
+	c.ModifiedAt = time.Now()
 }
 
 func ParseComponentID(s string) (ComponentID, error) {

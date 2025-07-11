@@ -8,6 +8,7 @@ type PageService interface {
 	GetPages(filter GetPages) ([]*Page, error)
 	GetPageById(id PageID) (*Page, error)
 	AddComponent(p *Page, comp *component.Component) error
+	EditComponent(p *Page, componentID component.ComponentID, updatedComponent *component.Component) error
 }
 
 type GetPages struct {

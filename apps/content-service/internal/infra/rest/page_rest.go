@@ -4,23 +4,21 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/domain/component"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/domain/page"
 )
 
 type PageRest struct {
-	page.PageService
+	pageSvc page.PageService
 }
 
 func NewPageRest(sm *http.ServeMux, pageService page.PageService) {
 	pageRest := &PageRest{
-		PageService: pageService,
+		pageSvc: pageService,
 	}
 
 	sm.HandleFunc("POST /v1/pages", pageRest.createPage)
 	sm.HandleFunc("GET /v1/pages", pageRest.getPages)
 	sm.HandleFunc("POST /v1/pages/{id}/publish", pageRest.publishPage)
-	sm.HandleFunc("POST /v1/pages/{id}/components", pageRest.addComponent)
 }
 
 func (pr *PageRest) createPage(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +27,7 @@ func (pr *PageRest) createPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page, err := pr.PageService.CreateDraftPage(dto.Title)
+	page, err := pr.pageSvc.CreateDraftPage(dto.Title)
 
 	if err != nil {
 		writeErr(w, err)
@@ -45,7 +43,7 @@ func (pr *PageRest) getPages(w http.ResponseWriter, r *http.Request) {
 		Title: query.Get("title"),
 	}
 
-	pages, err := pr.PageService.GetPages(filter)
+	pages, err := pr.pageSvc.GetPages(filter)
 	if err != nil {
 		writeErr(w, err)
 		return
@@ -63,7 +61,7 @@ func (pr *PageRest) publishPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page, err := pr.PageService.GetPageById(pageID)
+	page, err := pr.pageSvc.GetPageById(pageID)
 	if err != nil {
 		writeErr(w, err)
 		return
@@ -73,44 +71,9 @@ func (pr *PageRest) publishPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := pr.PageService.PublishPage(page); err != nil {
+	if err := pr.pageSvc.PublishPage(page); err != nil {
 		writeErr(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, page)
-}
-
-func (pr *PageRest) addComponent(w http.ResponseWriter, r *http.Request) {
-	pageID, err := page.ParsePageID(r.PathValue("id"))
-	if err != nil {
-		writeErr(w, err)
-		return
-	}
-
-	page, err := pr.PageService.GetPageById(pageID)
-	if err != nil {
-		writeErr(w, err)
-		return
-	}
-
-	var dto addComponentDTO
-	if err := readJSON(w, r, &dto); err != nil {
-		return
-	}
-
-	compType, err := component.NewComponentType(dto.Type)
-	if err != nil {
-		http.Error(w, "", http.StatusBadRequest)
-		return
-	}
-
-	newComponent := component.NewComponent(compType, dto.Data, nil)
-
-	if err := pr.PageService.AddComponent(page, newComponent); err != nil {
-		writeErr(w, err)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(page)
 }

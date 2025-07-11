@@ -1,6 +1,7 @@
 package page
 
 import (
+	"errors"
 	"time"
 
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/domain/component"
@@ -34,6 +35,24 @@ func (p *Page) MarkAsPublished() {
 
 func (p *Page) AddComponent(comp *component.Component) {
 	p.Components = append(p.Components, comp)
+}
+
+func (p *Page) EditComponent(componentID component.ComponentID, updatedComponent *component.Component) error {
+	foundComponent, isFound := p.findComponentById(componentID)
+	if !isFound {
+		return errors.New("Component not found")
+	}
+	foundComponent.Update(updatedComponent)
+	return nil
+}
+
+func (p *Page) findComponentById(id component.ComponentID) (*component.Component, bool) {
+	for i := range p.Components {
+		if p.Components[i].ComponentID == id {
+			return p.Components[i], true
+		}
+	}
+	return nil, false
 }
 
 func NewDraft(title string) *Page {

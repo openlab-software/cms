@@ -74,3 +74,13 @@ func (ps *PageServiceImpl) AddComponent(p *page.Page, comp *component.Component)
 
 	return nil
 }
+
+func (ps *PageServiceImpl) EditComponent(p *page.Page, componentID component.ComponentID, updatedComponent *component.Component) error {
+	p.EditComponent(componentID, updatedComponent)
+
+	if err := ps.repository.Update(p); err != nil {
+		return err
+	}
+
+	return nil
+}

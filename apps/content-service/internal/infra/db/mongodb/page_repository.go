@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type PageRepository struct {
+type MongoPageRepository struct {
 	Client *mongo.Client
 }
 
@@ -20,18 +20,18 @@ type PageDocument struct {
 	ID primitive.ObjectID `bson:"_id"`
 }
 
-func NewPageRepository(client *mongo.Client) PageRepository {
-	return PageRepository{Client: client}
+func NewPageRepository(client *mongo.Client) page.PageRepository {
+	return &MongoPageRepository{Client: client}
 }
 
-func (repository *PageRepository) connect() (*mongo.Collection, context.Context, context.CancelFunc) {
+func (repository *MongoPageRepository) connect() (*mongo.Collection, context.Context, context.CancelFunc) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	collection := repository.Client.Database("cms").Collection("pages")
 
 	return collection, ctx, cancel
 }
 
-func (r *PageRepository) Insert(p *page.Page) error {
+func (r *MongoPageRepository) Insert(p *page.Page) error {
 	collection, ctx, cancel := r.connect()
 	defer cancel()
 
@@ -44,7 +44,7 @@ func (r *PageRepository) Insert(p *page.Page) error {
 	return err
 }
 
-func (r *PageRepository) Update(p *page.Page) error {
+func (r *MongoPageRepository) Update(p *page.Page) error {
 	collection, ctx, cancel := r.connect()
 	defer cancel()
 
@@ -61,7 +61,7 @@ func (r *PageRepository) Update(p *page.Page) error {
 	return err
 }
 
-func (r *PageRepository) FindByTitle(title string) ([]*page.Page, error) {
+func (r *MongoPageRepository) FindByTitle(title string) ([]*page.Page, error) {
 	collection, ctx, cancel := r.connect()
 	defer cancel()
 
@@ -90,7 +90,7 @@ func (r *PageRepository) FindByTitle(title string) ([]*page.Page, error) {
 	return pages, nil
 }
 
-func (r *PageRepository) FindById(id page.PageID) (*page.Page, error) {
+func (r *MongoPageRepository) FindById(id page.PageID) (*page.Page, error) {
 	collection, ctx, cancel := r.connect()
 	defer cancel()
 
