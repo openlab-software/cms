@@ -1,7 +1,14 @@
 {
     "name": "cms",
     "private": true,
-    "packageManager": "pnpm@8.15.6",
+    "type": "module",
+    "workspaces": {
+        "packages": [
+            "libs/ts-common",
+            "apps/frontend"
+        ]
+    },
+    "packageManager": "yarn@1.22.22",
     "engines": {
         "node": ">=18"
     },
