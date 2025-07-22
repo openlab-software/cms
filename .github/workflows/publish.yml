@@ -6,9 +6,6 @@ on:
       image_name:
         required: true
         type: string
-      context:
-        required: true
-        type: string
       dockerfile:
         required: true
         type: string
@@ -35,9 +32,9 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ${{ inputs.context }}
+          context: ./
           file: ${{ inputs.dockerfile }}
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ inputs.image_name }}:latest
-            ${{ env.REGISTRY }}/${{ inputs.image_name }}:${{ inputs.image_tag }}
+            ${{ secrets.DOCKER_REGISTRY_URL }}/${{ inputs.image_name }}:latest
+            ${{ secrets.DOCKER_REGISTRY_URL }}/${{ inputs.image_name }}:${{ inputs.image_tag }}

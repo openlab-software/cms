@@ -16,10 +16,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
-    env:
-      REGISTRY: registry.patrick.dev.br
-
     steps:
       - uses: actions/checkout@v3
 
@@ -31,7 +27,7 @@ jobs:
       - name: Update image tag in manifest
         run: |
           find ${{ inputs.k8s_manifest_dir }} -type f -name "*.yaml" -exec \
-            sed -i "s|${{ env.REGISTRY }}/${{ inputs.image_name }}:latest|${{ env.REGISTRY }}/${{ inputs.image_name }}:${{ inputs.image_tag }}|g" {} +
+            sed -i "s|${{ secrets.DOCKER_REGISTRY_URL }}/${{ inputs.image_name }}:latest|${{ secrets.DOCKER_REGISTRY_URL }}/${{ inputs.image_name }}:${{ inputs.image_tag }}|g" {} +
 
       - name: Apply K8s manifests
         run: |
