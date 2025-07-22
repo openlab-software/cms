@@ -1,0 +1,51 @@
+name: Build, Publish and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-frontend:
+    uses: ./.github/workflows/build.yml
+    with:
+      dockerfile: ./.devops/docker/Dockerfile.frontend
+
+  publish-frontend:
+    needs: build-frontend
+    uses: ./.github/workflows/publish.yml
+    with:
+      image_name: cms-frontend
+      dockerfile: ./.devops/docker/Dockerfile.frontend
+      image_tag: ${{ needs.build-frontend.outputs.image_tag }}
+
+#   deploy-frontend:
+#     needs: publish-frontend
+#     uses: ./.github/workflows/deploy.yml
+#     with:
+#       k8s_manifest_dir: ./k8s/frontend
+#       image_name: cms-frontend
+#       image_tag: ${{ needs.build-frontend.outputs.image_tag }}
+
+#   build-golang:
+#     uses: ./.github/workflows/reusable-build.yml
+#     with:
+#       context: ./golang-app
+#       dockerfile: ./golang-app/Dockerfile
+
+#   publish-golang:
+#     needs: build-golang
+#     uses: ./.github/workflows/reusable-publish.yml
+#     with:
+#       image_name: golang-app
+#       context: ./golang-app
+#       dockerfile: ./golang-app/Dockerfile
+#       image_tag: ${{ needs.build-golang.outputs.image_tag }}
+
+#   deploy-golang:
+#     needs: publish-golang
+#     uses: ./.github/workflows/reusable-deploy.yml
+#     with:
+#       k8s_manifest_dir: ./k8s/golang
+#       image_name: golang-app
+#       image_tag: ${{ needs.build-golang.outputs.image_tag }}
