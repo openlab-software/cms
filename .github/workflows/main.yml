@@ -19,11 +19,22 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Yarn
-        run: npm install -g yarn
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Cache Yarn
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.yarn/cache
+            ~/.cache/yarn
+            node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --network-timeout 300000
 
       - name: Build project
         run: yarn build
