@@ -54,7 +54,6 @@ jobs:
         with:
           context: ./
           file: ./.devops/docker/Dockerfile.frontend
-          load: true
           push: true
           tags: |
             ${{ secrets.DOCKER_REGISTRY_URL }}/cms-frontend:latest
