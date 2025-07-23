@@ -20,6 +20,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - uses: actions/checkout@v4
+      - name: Download .next build
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
+
       - name: Generate Image Tag
         id: set-tag
         run: echo "image_tag=sha-${GITHUB_SHA::8}" >> $GITHUB_OUTPUT

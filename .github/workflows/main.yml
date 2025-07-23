@@ -39,6 +39,13 @@ jobs:
       - name: Build project
         run: yarn build
 
+      - name: Upload .next build
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: |
+            apps/frontend/.next
+
   build-frontend-image:
     needs: build-frontend
     uses: ./.github/workflows/build.yml
