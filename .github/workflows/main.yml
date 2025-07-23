@@ -39,12 +39,15 @@ jobs:
       - name: Build project
         run: yarn build
 
+      - name: Debug build output
+        run: ls -la apps/frontend/.next
+
       - name: Upload .next build
         uses: actions/upload-artifact@v4
         with:
           name: next-build
           path: |
-            apps/frontend/.next
+            ./apps/frontend/.next
 
   build-frontend-image:
     needs: build-frontend
