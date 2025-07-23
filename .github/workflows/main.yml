@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-frontend-image:
+  build-frontend:
     runs-on: ubuntu-latest
 
     steps:
@@ -39,11 +39,11 @@ jobs:
       - name: Build project
         run: yarn build
 
-      - name : Build Image
-        uses: ./.github/workflows/build.yml
-        with:
-          dockerfile: ./.devops/docker/Dockerfile.frontend
-
+  build-frontend-image:
+    needs: build-frontend
+    uses: ./.github/workflows/build.yml
+    with:
+      dockerfile: ./.devops/docker/Dockerfile.frontend
   publish-frontend:
     needs: build-frontend-image
     uses: ./.github/workflows/publish.yml
