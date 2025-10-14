@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/domain/page"
 )
 
@@ -11,14 +12,16 @@ type PageRest struct {
 	pageSvc page.PageService
 }
 
-func NewPageRest(sm *http.ServeMux, pageService page.PageService) {
+func NewPageRest(r *mux.Router, pageService page.PageService) {
 	pageRest := &PageRest{
 		pageSvc: pageService,
 	}
 
-	sm.HandleFunc("POST /v1/pages", pageRest.createPage)
-	sm.HandleFunc("GET /v1/pages", pageRest.getPages)
-	sm.HandleFunc("POST /v1/pages/{id}/publish", pageRest.publishPage)
+	pageRouter := r.PathPrefix("/pages").Subrouter()
+
+	pageRouter.HandleFunc("", pageRest.createPage).Methods("POST")
+	pageRouter.HandleFunc("", pageRest.getPages).Methods("GET")
+	pageRouter.HandleFunc("/{pageID}/publish", pageRest.publishPage).Methods("POST")
 }
 
 func (pr *PageRest) createPage(w http.ResponseWriter, r *http.Request) {
@@ -37,6 +40,16 @@ func (pr *PageRest) createPage(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, page)
 }
 
+// @Summary Edita um componente existente
+// @Description Atualiza parcialmente um componente de uma página
+// @Tags components
+// @Param pageID path string true "ID da página"
+// @Param componentID path string true "ID do componente"
+// @Accept json
+// @Produce json
+// @Success 200 {string} string "Componente atualizado"
+// @Failure 400 {string} string "Requisição inválida"
+// @Router /pages/{pageID}/components/{componentID} [patch]
 func (pr *PageRest) getPages(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	filter := page.GetPages{
@@ -55,7 +68,9 @@ func (pr *PageRest) getPages(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pr *PageRest) publishPage(w http.ResponseWriter, r *http.Request) {
-	pageID, err := page.ParsePageID(r.PathValue("id"))
+	vars := mux.Vars(r)
+
+	pageID, err := page.ParsePageID(vars["pageID"])
 	if err != nil {
 		writeErr(w, err)
 		return

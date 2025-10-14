@@ -3,6 +3,7 @@ package rest
 import (
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/domain/component"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/domain/page"
 )
@@ -11,22 +12,27 @@ type ComponentRest struct {
 	pageSvc page.PageService
 }
 
-func NewComponentRest(sm *http.ServeMux, pageSvc page.PageService) {
+func NewComponentRest(r *mux.Router, pageSvc page.PageService) {
 	componentRest := &ComponentRest{
 		pageSvc: pageSvc,
 	}
 
-	sm.HandleFunc("PATCH /v1/pages/{pageID}/components/{componentID}", componentRest.editComponent)
-	sm.HandleFunc("POST /v1/pages/{id}/components", componentRest.addComponent)
+	componentRouter := r.PathPrefix("/pages/{pageID}/components").Subrouter()
+
+	componentRouter.HandleFunc("/{componentID}", componentRest.editComponent).Methods("PATCH")
+	componentRouter.HandleFunc("", componentRest.addComponent).Methods("POST")
+	componentRouter.HandleFunc("", componentRest.getComponentById).Methods("GET")
 }
 
 func (cr *ComponentRest) editComponent(w http.ResponseWriter, r *http.Request) {
-	pageID, err := page.ParsePageID(r.PathValue("pageID"))
+	vars := mux.Vars(r)
+
+	pageID, err := page.ParsePageID(vars["pageID"])
 	if err != nil {
 		writeErr(w, err)
 		return
 	}
-	componentID, err := component.ParseComponentID(r.PathValue("componentID"))
+	componentID, err := component.ParseComponentID(vars["componentID"])
 	if err != nil {
 		writeErr(w, err)
 		return
@@ -54,7 +60,9 @@ func (cr *ComponentRest) editComponent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cr *ComponentRest) addComponent(w http.ResponseWriter, r *http.Request) {
-	pageID, err := page.ParsePageID(r.PathValue("id"))
+	vars := mux.Vars(r)
+
+	pageID, err := page.ParsePageID(vars["pageID"])
 	if err != nil {
 		writeErr(w, err)
 		return
@@ -84,4 +92,8 @@ func (cr *ComponentRest) addComponent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, page)
+}
+
+func (cr *ComponentRest) getComponentById(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(200)
 }

@@ -5,13 +5,16 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	_ "github.com/patrickdevbr-portfolio/cms/apps/content-service/docs"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/application/services"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/infra/amqpevent"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/infra/db/mongodb"
 	"github.com/patrickdevbr-portfolio/cms/apps/content-service/internal/infra/rest"
 	"github.com/patrickdevbr-portfolio/cms/libs/go-common/mongodatabase"
 	"github.com/patrickdevbr-portfolio/cms/libs/go-common/rabbitmq"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type application struct {
@@ -25,7 +28,7 @@ type config struct {
 func (app *application) run() error {
 	godotenv.Load(".env.dev")
 
-	mux := http.NewServeMux()
+	router := mux.NewRouter()
 
 	// oidcProvider, err := auth.NewOIDCProvider()
 	// if err != nil {
@@ -50,12 +53,15 @@ func (app *application) run() error {
 	pageRepo := mongodb.NewPageRepository(mongoClient)
 	pageSvc := services.NewPageService(pageRepo, eventPublisher)
 
-	rest.NewPageRest(mux, pageSvc)
-	rest.NewComponentRest(mux, pageSvc)
+	router.PathPrefix("/docs").Handler(httpSwagger.WrapHandler)
+
+	v1 := router.PathPrefix("/v1").Subrouter()
+	rest.NewPageRest(v1, pageSvc)
+	rest.NewComponentRest(v1, pageSvc)
 
 	srv := &http.Server{
 		Addr:    app.config.addr,
-		Handler: mux,
+		Handler: router,
 	}
 
 	return srv.ListenAndServe()
