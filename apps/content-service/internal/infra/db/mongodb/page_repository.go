@@ -26,7 +26,7 @@ func NewPageRepository(client *mongo.Client) page.PageRepository {
 
 func (repository *MongoPageRepository) connect() (*mongo.Collection, context.Context, context.CancelFunc) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	collection := repository.Client.Database("cms").Collection("pages")
+	collection := repository.Client.Database("cms-content-service").Collection("pages")
 
 	return collection, ctx, cancel
 }
