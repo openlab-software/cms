@@ -40,7 +40,7 @@ func (p *Page) AddComponent(comp *component.Component) {
 func (p *Page) EditComponent(componentID component.ComponentID, updatedComponent *component.Component) error {
 	foundComponent, isFound := p.findComponentById(componentID)
 	if !isFound {
-		return errors.New("Component not found")
+		return errors.New("component not found")
 	}
 	foundComponent.Update(updatedComponent)
 	return nil
@@ -68,7 +68,7 @@ func NewDraft(title string) *Page {
 }
 
 func ParsePageID(s string) (PageID, error) {
-	publicID, err := publicid.Parse("page", s)
+	publicID, err := publicid.ParsePublic("page", s)
 
 	return PageID(publicID), err
 }

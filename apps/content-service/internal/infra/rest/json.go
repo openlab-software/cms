@@ -12,7 +12,7 @@ func writeJSON(w http.ResponseWriter, status int, data any) error {
 }
 
 func writeErr(w http.ResponseWriter, err error) error {
-	return writeJSON(w, http.StatusInternalServerError, map[string]any{"err": err})
+	return writeJSON(w, http.StatusInternalServerError, map[string]any{"err": err.Error()})
 }
 
 func readJSON(w http.ResponseWriter, r *http.Request, v any) error {

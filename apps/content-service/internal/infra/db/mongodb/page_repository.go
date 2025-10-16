@@ -55,8 +55,9 @@ func (r *MongoPageRepository) Update(p *page.Page) error {
 	filter := bson.D{{Key: "page_id", Value: p.PageID}}
 
 	_, err := collection.UpdateOne(ctx, filter, bson.M{"$set": bson.M{
-		"status":     document.Status,
-		"components": document.Components,
+		"status":       document.Status,
+		"components":   document.Components,
+		"published_at": document.PublishedAt,
 	}})
 	return err
 }

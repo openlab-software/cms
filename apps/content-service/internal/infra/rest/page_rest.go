@@ -37,7 +37,7 @@ func (pr *PageRest) createPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, page)
+	writeJSON(w, http.StatusOK, toPageDTO(page))
 }
 
 // @Summary Edita um componente existente
@@ -64,7 +64,8 @@ func (pr *PageRest) getPages(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(pages)
+
+	json.NewEncoder(w).Encode(toPagesDTO(pages))
 }
 
 func (pr *PageRest) publishPage(w http.ResponseWriter, r *http.Request) {
@@ -90,5 +91,5 @@ func (pr *PageRest) publishPage(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, page)
+	writeJSON(w, http.StatusOK, toPageDTO(page))
 }

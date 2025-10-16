@@ -1,14 +1,11 @@
 package component
 
 import (
-	"errors"
 	"time"
 
 	"github.com/patrickdevbr-portfolio/cms/libs/go-common/audit"
 	"github.com/patrickdevbr-portfolio/cms/libs/go-common/publicid"
 )
-
-var ErrInvalidStyleBreakpoint = errors.New("invalid style breakpoint")
 
 type ComponentID = publicid.PublicID
 
@@ -45,7 +42,7 @@ func (c *Component) Update(from *Component) {
 }
 
 func ParseComponentID(s string) (ComponentID, error) {
-	publicID, err := publicid.Parse("component", s)
+	publicID, err := publicid.ParsePublic("component", s)
 
 	return ComponentID(publicID), err
 }

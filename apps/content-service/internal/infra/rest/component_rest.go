@@ -49,6 +49,11 @@ func (cr *ComponentRest) editComponent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := component.ValidateStyles(dto.Styles); err != nil {
+		writeErr(w, err)
+		return
+	}
+
 	err = cr.pageSvc.EditComponent(page, componentID, &component.Component{Data: dto.Data, Type: dto.Type, Styles: dto.Styles})
 
 	if err != nil {
@@ -56,7 +61,7 @@ func (cr *ComponentRest) editComponent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, page)
+	writeJSON(w, http.StatusOK, toPageDTO(page))
 }
 
 func (cr *ComponentRest) addComponent(w http.ResponseWriter, r *http.Request) {
@@ -91,7 +96,7 @@ func (cr *ComponentRest) addComponent(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, page)
+	writeJSON(w, http.StatusOK, toPageDTO(page))
 }
 
 func (cr *ComponentRest) getComponentById(w http.ResponseWriter, r *http.Request) {
